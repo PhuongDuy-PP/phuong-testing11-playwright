@@ -5,10 +5,25 @@ export class HomePage {
 
     // locator
     readonly sidebarMenuNames: Locator
+    readonly myInfoMenu: Locator
+    readonly adminMenu: Locator
 
     constructor(page: Page) {
         this.page = page
         this.sidebarMenuNames = page.locator("//span[@class='oxd-text oxd-text--span oxd-main-menu-item--name']")
+        this.myInfoMenu = page.locator("//span[text()='My Info']")
+        this.adminMenu = page.locator("//span[text()='Admin']")
+    }
+
+    async clickMenuMyInfo(): Promise<void> {
+        // thêm step đợi localtor sidebar menu hiển thị để đảm bảo click vào menu My Info ko bị lỗi
+        await this.sidebarMenuNames.first().waitFor({timeout: 30000})
+        await this.myInfoMenu.click()
+    }
+
+    async clickMenuAdmin(): Promise<void> {
+        await this.sidebarMenuNames.first().waitFor({timeout: 30000})
+        await this.adminMenu.click()
     }
 
     // get list sidebar menu name

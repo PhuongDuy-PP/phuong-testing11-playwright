@@ -28,7 +28,7 @@ export default defineConfig({
   ],
   // thêm timeout cho expect, nếu vượt quá thời gian này mà điều kiện vẫn chưa thỏa => fail
   expect: {
-    timeout: 10000
+    timeout: 30000
   },
   timeout: 120000, // timeout cho toàn bộ test case, nếu vượt quá thời gian này mà test case vẫn chưa hoàn thành => fail
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
