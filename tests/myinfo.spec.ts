@@ -3,6 +3,7 @@ import test, { expect } from '@playwright/test'
 import { LoginPage } from "../pages/LoginPage"
 import { HomePage } from "../pages/HomePage"
 import { MyInfoPage } from '../pages/MyInfoPage'
+import { highlightStep } from './utils/highlightStep'
 
 test.describe("My info test", () => {
 
@@ -26,9 +27,11 @@ test.describe("My info test", () => {
     test("TC1: Upload avatar", async ({page}) => {
         const myInfoPage = new MyInfoPage(page)
 
+        await highlightStep(page, myInfoPage.avatarWrapper)
         await myInfoPage.uploadAvatar()
 
         // mặc định để là true
+        await highlightStep(page, myInfoPage.fileInput)
         const uploadFileCount = await myInfoPage.fileInput.evaluate((el) => {
             // input ở đây chính là fileInput trong MyInfoPage
             // vì hàm evaluate sẽ trả về fileInput element từ DOM của page

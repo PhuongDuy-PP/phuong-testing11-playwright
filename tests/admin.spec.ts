@@ -3,12 +3,13 @@ import test, { expect } from '@playwright/test'
 import { LoginPage } from '../pages/LoginPage'
 import { HomePage } from '../pages/HomePage'
 import { AdminPage } from '../pages/AdminPage'
+import { highlightStep } from './utils/highlightStep'
 
 test.describe("TC: Admin page test", () =>{
     test.beforeEach(async ({page}) => {
         const loginPage = new LoginPage(page)
 
-        await loginPage.login("Admin", "admin123")
+        await loginPage.login(process.env.USERNAME!, process.env.PASSWORD!)
 
         // await loginPage.isLoginSuccessfull()
 
@@ -20,8 +21,13 @@ test.describe("TC: Admin page test", () =>{
     test("TC1: Filter admin user", async ({page}) => {
         const adminPage = new AdminPage(page)
 
+        await highlightStep(page, adminPage.usernameInput)
         await adminPage.filterAdminUser("Admin")
+
+        await highlightStep(page, adminPage.userRoleSelect)
         await adminPage.selectAdminRole()
+
+        await highlightStep(page, adminPage.searchButton)
         await adminPage.clickSearchButton()
 
         await adminPage.waitForLoadingSpinnerToDisappear()
