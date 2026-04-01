@@ -62,6 +62,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-allure-report
+          # nếu không tìm thấy file nào để upload thì báo warning, ko cho fail job
           if-no-files-found: warn
           # liệt kê tất cả file cần upload
           path: |
@@ -70,4 +71,21 @@ jobs:
             allure-report/
             test-results/
 
-      # B8: gửi report qua slack
+      # 8) Gửi thông báo tổng hợp lên Slack (Incoming Webhook).
+      #    Bạn cần set secret `SLACK_WEBHOOK_URL` trong GitHub repo.
+      - name: Send Slack summary
+        if: always()
+        continue-on-error: true
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          STATUS: ${{ job.status }}
+          REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          payload=$(cat <<EOF
+          {
+            "text": "*Playwright CI*\nRepo: ${REPO}\nStatus: ${STATUS}\nRun: ${RUN_URL}"
+          }
+          EOF
+          )
+          curl -X POST -H "Content-Type: application/json" --data "$payload" "$SLACK_WEBHOOK_URL"
