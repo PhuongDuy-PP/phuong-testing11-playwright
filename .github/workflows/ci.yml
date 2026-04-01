@@ -42,7 +42,15 @@ jobs:
           echo "PASSWORD=${{secrets.PASSWORD}}" >> .env
       # B5: chạy test bằng Playwright
       - name: Run Playwright tests
-        run: npx playwright test --project=chromium
+        # run: npx playwright test --project=chromium
+        env:
+          # Đường dẫn output JSON đầy đủ (ổn định hơn OUTPUT_NAME khi có thư mục con).
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/report.json
+        run: |
+          # Tạo sẵn thư mục output để reporter ghi file chắc chắn.
+          mkdir -p test-results
+          # Chạy test + line reporter cho log console + json reporter cho bước summary.
+          npx playwright test --project=chromium --reporter=line,json
       
       # B6: Tạo báo cáo allure (nếu có)
       - name: Generate Allure report
