@@ -42,16 +42,15 @@ jobs:
           echo "PASSWORD=${{secrets.PASSWORD}}" >> .env
       # B5: chạy test bằng Playwright
       - name: Run Playwright tests
-        # run: npx playwright test --project=chromium
         env:
-          # Đường dẫn output JSON đầy đủ (ổn định hơn OUTPUT_NAME khi có thư mục con).
           PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/report.json
         run: |
-          # Tạo sẵn thư mục output để reporter ghi file chắc chắn.
+          # tạo folder test-results để lưu kết quả test
           mkdir -p test-results
-          # Chạy test + line reporter cho log console + json reporter cho bước summary.
+
+          # chạy test với trình duyệt chromium
           npx playwright test --project=chromium --reporter=line,json
-      
+
       # B6: Tạo báo cáo allure (nếu có)
       - name: Generate Allure report
         if: always() # luôn chạy bước này dù test có pass hay fail
@@ -77,28 +76,9 @@ jobs:
             playwright-report/
             allure-results/
             allure-report/
-            test-results/
+            test-results/report.json
 
-      # # 8) Gửi thông báo tổng hợp lên Slack (Incoming Webhook).
-      # #    Bạn cần set secret `SLACK_WEBHOOK_URL` trong GitHub repo.
-      # - name: Send Slack summary
-      #   if: always()
-      #   continue-on-error: true
-      #   env:
-      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      #     STATUS: ${{ job.status }}
-      #     REPO: ${{ github.repository }}
-      #     RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      #   run: |
-      #     payload=$(cat <<EOF
-      #     {
-      #       "text": "*Playwright CI*\nRepo: ${REPO}\nStatus: ${STATUS}\nRun: ${RUN_URL}"
-      #     }
-      #     EOF
-      #     )
-      #     curl -X POST -H "Content-Type: application/json" --data "$payload" "$SLACK_WEBHOOK_URL"
-
-      # 8) Đọc report.json → ghi TEST_* vào GITHUB_ENV (bước Slack dùng).
+      # B8: DĐọc file report.json -> ghi TEST_* vào GITHUB_ENV (bước Slack dùng)
       - name: Build test summary
         if: always()
         run: |
@@ -111,7 +91,7 @@ jobs:
             node -e 'const f=require("fs"),e=process.env.GITHUB_ENV,n=x=>Number(x||0),j=JSON.parse(f.readFileSync("test-results/report.json","utf8")),s=j.stats||{};f.appendFileSync(e,`TEST_PASSED=${n(s.expected)}\nTEST_FAILED=${n(s.unexpected)}\nTEST_SKIPPED=${n(s.skipped)}\nTEST_FLAKY=${n(s.flaky)}\n`)'
           fi
 
-      # 9) POST tóm tắt lên Slack Incoming Webhook (secret SLACK_WEBHOOK_URL trong repo).
+      # B9: Gửi thông báo test lên Slack (nếu có)
       - name: Send Slack summary
         if: always()
         continue-on-error: true
